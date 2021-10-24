@@ -7,7 +7,6 @@ const getIdentifier = (code) => {
   let Nums = /\b\d+(\.\d*)?([eE][+-]?\d+)?\b/g;
   let Oper1 = /([-+*/=()&|;:.,<>{}[\]])/g; // May be some character is missing?
 
-
   const regxIsOpe =
     /^[a-zA-Z]+ = ([a-zA-Z]+|[0-9]+) (-|\+|\/|\*) ([a-zA-Z]+|[0-9]+)/g;
 
@@ -107,6 +106,7 @@ const getIdentifier = (code) => {
       }
 
       // OPERACIONES
+
       if (['+', '-', '*', '/'].includes(getCodeCad[i][3])) {
         if (
           getCodeCad[i][2].match(regxInt) &&
@@ -146,10 +146,10 @@ const getIdentifier = (code) => {
           }
 
           if (!verificarVariable(getCodeCad[i][2], variables)) {
-            textErrors += `Error linea ${cont}, La variable ${getCodeCad[i][4]} no esta declarada.\n`;
+            textErrors += `Error linea ${cont}, La variable "${getCodeCad[i][4]}" no esta declarada.\n`;
           }
           if (!verificarVariable(getCodeCad[i][4], variables)) {
-            textErrors += `Error linea ${cont}, La variable ${getCodeCad[i][4]} no esta declarada.\n`;
+            textErrors += `Error linea ${cont}, La variable "${getCodeCad[i][4]}" no esta declarada.\n`;
           }
         }
       }

@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ConsolaSintactica = ({ codigo }) => {
+const ConsolaSemantica = ({ codigo }) => {
   const classes = useStyles();
   return (
     <>
@@ -43,4 +43,4 @@ const ConsolaSintactica = ({ codigo }) => {
   );
 };
 
-export default ConsolaSintactica;
+export default ConsolaSemantica;

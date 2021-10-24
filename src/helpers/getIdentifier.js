@@ -7,18 +7,24 @@ const getIdentifier = (code) => {
   let Nums = /\b\d+(\.\d*)?([eE][+-]?\d+)?\b/g;
   let Oper1 = /([-+*/=()&|;:.,<>{}[\]])/g; // May be some character is missing?
 
-  const regxConst = /const ([a-zA-Z]+)( = )([0-9]+)(;)$/g;
-  const regxLetOrVar = /(var|let) ([a-zA-Z]+)(;|(( = )([0-9]+);))$/g;
-  const regxFunction = /function ([a-zA-Z]+ )((\(\))|(\([a-zA-Z]+\))) {$/g;
-  const regxIf = /if \(.+\) {$/g;
-  const regxElse = /else {$/g;
-  const regxConsole = /console.log\(.\);$/g;
-  const regxWhile = /while \(.+\) {$/g;
+
+  const regxIsOpe =
+    /^[a-zA-Z]+ = ([a-zA-Z]+|[0-9]+) (-|\+|\/|\*) ([a-zA-Z]+|[0-9]+)/g;
+
+  const regxInt = /[0-9]+/g;
+  const regxBool = /(true|false)/g;
+  const regxString = /[a-zA-Z]+/g;
 
   let identificador = '';
   let numero = '';
   const getCode = code.match(/[^\r\n]+/g);
   let textErrors = '';
+
+  const variables = {
+    int: {},
+    string: {},
+    bool: {},
+  };
 
   // Separar en token cada linea de codigo
   for (let codeI = 0; codeI < getCode.length; codeI++) {
@@ -49,86 +55,120 @@ const getIdentifier = (code) => {
     getCodeCad = [...getCodeCad, tempArray];
   }
 
-  let llavesD = 0;
-  let llavesI = 0;
-
   for (let i = 0; i < getCodeCad.length; i++) {
     const cont = i + 1;
-    // Si son variables
-    if (getCodeCad[i].includes('const')) {
-      if (!getCode[i].match(regxConst)) {
-        textErrors += `Error linea ${cont}, solucion: const ${
-          getCodeCad[i][1] ? getCodeCad[i][1] : 'name'
-        } = ${getCodeCad[i][3]?.match(Nums) ? getCodeCad[i][3] : 0};\n`;
-      }
-    }
-    if (getCodeCad[i].includes('let') || getCodeCad[i].includes('var')) {
-      if (!getCode[i].match(regxLetOrVar)) {
-        if (getCodeCad[i].length === 3) {
-          textErrors += `Error linea ${cont}, solucion: ${getCodeCad[i][0]} ${
-            getCodeCad[i][1] ? getCodeCad[i][1] : 'name'
-          };\n`;
-        } else {
-          textErrors += `Error linea ${cont}, solucion: ${getCodeCad[i][0]} ${
-            getCodeCad[i][1] ? getCodeCad[i][1] : 'name'
-          } = ${getCodeCad[i][3]?.match(Nums) ? getCodeCad[i][3] : 0};\n`;
+    if (
+      getCodeCad[i].includes('const') ||
+      getCodeCad[i].includes('let') ||
+      getCodeCad[i].includes('var')
+    ) {
+      if (getCodeCad[i].length === 5) {
+        if (getCodeCad[i][3].match(regxInt)) {
+          variables['int'] = {
+            ...variables['int'],
+            [getCodeCad[i][1]]: getCodeCad[i][3],
+          };
+        }
+        if (
+          getCodeCad[i][3].match(regxString) &&
+          getCodeCad[i][3] !== 'true' &&
+          getCodeCad[i][3] !== 'false'
+        ) {
+          variables['string'] = {
+            ...variables['string'],
+            [getCodeCad[i][1]]: getCodeCad[i][3],
+          };
+        }
+        if (getCodeCad[i][3].match(regxBool)) {
+          variables['bool'] = {
+            ...variables['bool'],
+            [getCodeCad[i][1]]: getCodeCad[i][3],
+          };
         }
       }
     }
+    if (getCode[i].match(regxIsOpe)) {
+      let operacionName = '';
+      switch (getCodeCad[i][3]) {
+        case '+':
+          operacionName = 'sumar';
+          break;
+        case '-':
+          operacionName = 'restar';
+          break;
+        case '*':
+          operacionName = 'multiplicar';
+          break;
+        case '/':
+          operacionName = 'dividir';
+          break;
+        default:
+          operacionName = '';
+      }
 
-    // Si es una function
-    if (getCodeCad[i].includes('function')) {
-      if (!getCode[i].match(regxFunction)) {
-        textErrors += `Error linea ${cont}, solucion: function ${
-          getCodeCad[i][1] ? getCodeCad[i][1] : 'name'
-        } (${getCodeCad[i][3]?.match(Ident) ? getCodeCad[i][3] : 'param'}) {\n`;
+      // OPERACIONES
+      if (['+', '-', '*', '/'].includes(getCodeCad[i][3])) {
+        if (
+          getCodeCad[i][2].match(regxInt) &&
+          getCodeCad[i][4].match(regxInt)
+        ) {
+        } else if (getCodeCad[i][2].match(regxInt)) {
+          if (!variables['int'].hasOwnProperty([getCodeCad[i][4]])) {
+            if (!verificarVariable(getCodeCad[i][4], variables)) {
+              textErrors += `Error linea ${cont}, La variable ${getCodeCad[i][4]} no esta declarada.\n`;
+            }
+            textErrors += `Error linea ${cont}, No puede ${operacionName} "${getCodeCad[i][2]}" con "${getCodeCad[i][4]}"\n`;
+          }
+        } else if (getCodeCad[i][4].match(regxInt)) {
+          if (!variables['int'].hasOwnProperty([getCodeCad[i][2]])) {
+            if (!verificarVariable(getCodeCad[i][2], variables)) {
+              textErrors += `Error linea ${cont}, La variable ${getCodeCad[i][2]} no esta declarada.\n`;
+            }
+            textErrors += `Error linea ${cont}, No puede ${operacionName} "${getCodeCad[i][2]}" con "${getCodeCad[i][4]}"\n`;
+          }
+        } else {
+          if (
+            verificarVariable(getCodeCad[i][2], variables) &&
+            verificarVariable(getCodeCad[i][4], variables)
+          ) {
+            if (
+              variables['string'].hasOwnProperty([getCodeCad[i][2]]) &&
+              variables['string'].hasOwnProperty([getCodeCad[i][4]]) &&
+              getCodeCad[i][3] !== '+'
+            ) {
+              textErrors += `Error linea ${cont}, No puede ${operacionName} "${getCodeCad[i][2]}" con "${getCodeCad[i][4]}", ambos son String.\n`;
+            } else if (
+              !variables['int'].hasOwnProperty([getCodeCad[i][2]]) ||
+              !variables['int'].hasOwnProperty([getCodeCad[i][4]])
+            ) {
+              textErrors += `Error linea ${cont}, No puede ${operacionName} "${getCodeCad[i][2]}" con "${getCodeCad[i][4]}"\n`;
+            }
+          }
+
+          if (!verificarVariable(getCodeCad[i][2], variables)) {
+            textErrors += `Error linea ${cont}, La variable ${getCodeCad[i][4]} no esta declarada.\n`;
+          }
+          if (!verificarVariable(getCodeCad[i][4], variables)) {
+            textErrors += `Error linea ${cont}, La variable ${getCodeCad[i][4]} no esta declarada.\n`;
+          }
+        }
       }
     }
-
-    //Si es in if
-    if (getCodeCad[i].includes('if')) {
-      if (!getCode[i].match(regxIf)) {
-        textErrors += `Error linea ${cont}, solucion: if (true) {\n`;
-      }
-    }
-
-    //Si es in else
-    if (getCodeCad[i].includes('else')) {
-      if (!getCode[i].match(regxElse)) {
-        textErrors += `Error linea ${cont}, solucion: else {\n`;
-      }
-    }
-
-    // Si es un console.log
-    if (getCodeCad[i].includes('console')) {
-      if (!getCode[i].match(regxConsole)) {
-        textErrors += `Error linea ${cont}, solucion: console.log(value);\n`;
-      }
-    }
-
-    // Si es un while
-    if (getCodeCad[i].includes('while')) {
-      if (!getCode[i].match(regxWhile)) {
-        textErrors += `Error linea ${cont}, solucion: while (true) {\n`;
-      }
-    }
-
-    //Cantidad de llaves
-    if (getCodeCad[i].includes('{')) {
-      llavesI += 1;
-    }
-    if (getCodeCad[i].includes('}')) {
-      llavesD += 1;
-    }
-  }
-
-  if (llavesI > llavesD) {
-    textErrors += `Error, faltan ${llavesI - llavesD}  '}'  de cierre.\n`;
-  } else if (llavesD > llavesI) {
-    textErrors += `Error, faltan ${llavesD - llavesI}  '{'  de cierre.\n`;
   }
 
   return textErrors;
+};
+
+const verificarVariable = (name, variables) => {
+  let isCorrect = false;
+
+  Object.keys(variables).forEach((value) => {
+    if (variables[value][name]) {
+      isCorrect = true;
+    }
+  });
+
+  return isCorrect;
 };
 
 export default getIdentifier;

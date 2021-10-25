@@ -7,7 +7,6 @@ const AnalizadorSintactico = () => {
 
   return (
     <>
-    {console.log(data)}
       <Form setData={setData} />
       <ConsolaSemantica codigo={data} />
     </>

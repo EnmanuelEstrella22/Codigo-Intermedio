@@ -134,14 +134,21 @@ const getIdentifier = (code) => {
             if (
               variables['string'].hasOwnProperty([getCodeCad[i][2]]) &&
               variables['string'].hasOwnProperty([getCodeCad[i][4]]) &&
-              getCodeCad[i][3] !== '+'
+              getCodeCad[i][3] === '+'
             ) {
-              textErrors += `Error linea ${cont}, No puede ${operacionName} "${getCodeCad[i][2]}" con "${getCodeCad[i][4]}", ambos son String.\n`;
-            } else if (
-              !variables['int'].hasOwnProperty([getCodeCad[i][2]]) ||
-              !variables['int'].hasOwnProperty([getCodeCad[i][4]])
-            ) {
-              textErrors += `Error linea ${cont}, No puede ${operacionName} "${getCodeCad[i][2]}" con "${getCodeCad[i][4]}"\n`;
+            } else {
+              if (
+                variables['string'].hasOwnProperty([getCodeCad[i][2]]) &&
+                variables['string'].hasOwnProperty([getCodeCad[i][4]]) &&
+                getCodeCad[i][3] !== '+'
+              ) {
+                textErrors += `Error linea ${cont}, No puede ${operacionName} "${getCodeCad[i][2]}" con "${getCodeCad[i][4]}", ambos son String.\n`;
+              } else if (
+                !variables['int'].hasOwnProperty([getCodeCad[i][2]]) ||
+                !variables['int'].hasOwnProperty([getCodeCad[i][4]])
+              ) {
+                textErrors += `Error linea ${cont}, No puede ${operacionName} "${getCodeCad[i][2]}" con "${getCodeCad[i][4]}"\n`;
+              }
             }
           }
 

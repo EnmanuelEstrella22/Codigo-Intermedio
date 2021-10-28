@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ConsolaSemantica = ({ codigo }) => {
+const ConsolaIntermedia = ({ codigo }) => {
   const classes = useStyles();
   return (
     <>
@@ -43,4 +43,4 @@ const ConsolaSemantica = ({ codigo }) => {
   );
 };
 
-export default ConsolaSemantica;
+export default ConsolaIntermedia;

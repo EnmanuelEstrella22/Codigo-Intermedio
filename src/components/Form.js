@@ -30,7 +30,7 @@ const Form = ({ setData }) => {
     <>
       <Box display="flex" justifyContent="center" alignItems="center">
         <div>
-          <h1>ANALIZADOR SEMÁNTICO</h1>
+          <h1>GENERACIÓN DE CÓDIGO INTERMEDIO</h1>
           <div className={classes.container}>
             <span className={classes.title}>Autor:</span>
             <span className={classes.text}>

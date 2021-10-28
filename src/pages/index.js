@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ConsolaSemantica from '../components/ConsolaSemantica';
+import ConsolaIntermedia from '../components/ConsolaIntermedia';
 import Form from '../components/Form';
 
 const AnalizadorSintactico = () => {
@@ -8,7 +8,7 @@ const AnalizadorSintactico = () => {
   return (
     <>
       <Form setData={setData} />
-      <ConsolaSemantica codigo={data} />
+      <ConsolaIntermedia codigo={data} />
     </>
   );
 };
